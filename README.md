@@ -1,3 +1,18 @@
+## 👉 Live Demo
+You can try the latest version of **Conlang Studio** here:
+👉 **[https://conlangstudio.vercel.app/](https://conlangstudio.vercel.app/)**
+
+---
+
+## 🗺️ Roadmap (Upcoming Features)
+Conlang Studio is constantly evolving. Here are the features planned for future versions (v1.1 and beyond):
+
+* **🌍 Multi-language Support:** Expanding the interface and dictionary tools to support languages other than English.
+* **⚖️ Advanced Language Rules:** More freedom and complex validation rules for phonology and grammar systems.
+* **🎨 New Visual Themes:** More preset color palettes and enhanced custom theme options.
+* **💻 Power-User Console:** Expanding the terminal with new commands to create, edit, and delete words directly from the command line.
+* **📱 Enhanced Mobile UI:** Further optimization for mobile browsers.
+
 # Conlang Studio
 
 A professional Integrated Development Environment (IDE) for constructed languages.
