@@ -86,7 +86,7 @@ const MenuBar: React.FC<MenuBarProps> = ({
       id: 'help',
       label: t('menu.help'),
       items: [
-        { label: t('menu.docs'), icon: HelpCircle, action: () => window.open('https://github.com/rzRudy/Conlang-Studio', '_blank') },
+        { label: t('menu.docs'), icon: HelpCircle, action: () => window.open('https://github.com/zRinexD/KoreLang/', '_blank') },
         { label: t('menu.about'), action: () => onOpenAbout?.() },
       ]
     }

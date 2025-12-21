@@ -34,11 +34,11 @@ const PhonologyEditor: React.FC<PhonologyEditorProps> = ({ data, setData, enable
 
     // Helper to find phoneme in specific cell
     const getConsonants = (manner: string, place: string) => {
-        return data.consonants.filter(p => p.manner === manner && p.place === place);
+        return (data.consonants || []).filter(p => p.manner === manner && p.place === place);
     };
 
     const getVowels = (height: string, backness: string) => {
-        return data.vowels.filter(p => p.height === height && p.backness === backness);
+        return (data.vowels || []).filter(p => p.height === height && p.backness === backness);
     };
 
     return (
@@ -67,7 +67,7 @@ const PhonologyEditor: React.FC<PhonologyEditorProps> = ({ data, setData, enable
                                     <div className="mt-3 p-3 bg-amber-950/20 border border-amber-900/50 rounded-lg text-[11px] text-amber-200 flex items-start gap-3">
                                         <ShieldAlert size={14} className="shrink-0 text-amber-500" />
                                         <div>
-                                            AI services require an API Key. Follow instructions in <a href="https://github.com/rzRudy/Conlang-Studio" target="_blank" rel="noopener noreferrer" className="underline font-bold">Documentation</a>.
+                                            AI services require an API Key. Follow instructions in <a href="https://github.com/zRinexD/KoreLang/" target="_blank" rel="noopener noreferrer" className="underline font-bold">Documentation</a>.
                                         </div>
                                     </div>
                                 )}
@@ -98,15 +98,15 @@ const PhonologyEditor: React.FC<PhonologyEditorProps> = ({ data, setData, enable
                     <div className="space-y-4 text-sm">
                         <div className="flex justify-between border-b border-neutral-800 pb-2">
                             <span className="text-neutral-400">{t('phonology.inventory')}</span>
-                            <span className="text-neutral-200 font-mono">{data.consonants.length + data.vowels.length}</span>
+                            <span className="text-neutral-200 font-mono">{(data.consonants?.length || 0) + (data.vowels?.length || 0)}</span>
                         </div>
                         <div className="flex justify-between border-b border-neutral-800 pb-2">
                             <span className="text-neutral-400">{t('phonology.consonants')}</span>
-                            <span className="text-neutral-200 font-mono">{data.consonants.length}</span>
+                            <span className="text-neutral-200 font-mono">{data.consonants?.length || 0}</span>
                         </div>
                         <div className="flex justify-between border-b border-neutral-800 pb-2">
                             <span className="text-neutral-400">{t('phonology.vowels')}</span>
-                            <span className="text-neutral-200 font-mono">{data.vowels.length}</span>
+                            <span className="text-neutral-200 font-mono">{data.vowels?.length || 0}</span>
                         </div>
                         <div>
                             <span className="text-neutral-400 block mb-1">{t('phonology.syllable_struct')}</span>
@@ -194,7 +194,7 @@ const PhonologyEditor: React.FC<PhonologyEditorProps> = ({ data, setData, enable
                                                 {cIdx === 0 && <span className="absolute -left-16 text-[10px] text-neutral-600 uppercase w-12 text-right">{height}</span>}
 
                                                 {vowels.map((v, i) => (
-                                                    <span key={i} className={`text-xl font-serif mx-1 ${v.rounded ? 'text-amber-400' : 'text-blue-300'}`} title={`${height} ${back} ${v.rounded ? 'rounded' : 'unrounded'}`}>
+                                                    <span key={`${v.symbol}-${i}`} className={`text-xl font-serif mx-1 ${v.rounded ? 'text-amber-400' : 'text-blue-300'}`} title={`${height} ${back} ${v.rounded ? 'rounded' : 'unrounded'}`}>
                                                         {v.symbol}
                                                     </span>
                                                 ))}

@@ -486,7 +486,7 @@ const Lexicon: React.FC<LexiconProps> = ({
                     {!isApiKeySet() && (
                         <div className="flex-1 bg-amber-950/20 border border-amber-900/50 rounded-lg p-2 text-xs text-amber-200 flex items-center gap-3">
                             <ShieldAlert size={14} className="shrink-0 text-amber-500" />
-                            <p>{t('lexicon.ai_requires_key') || 'AI Generation requires an API Key.'} <a href="https://github.com/rzRudy/Conlang-Studio" target="_blank" rel="noopener noreferrer" className="underline font-bold">{t('lexicon.docs') || 'Documentation'}</a>.</p>
+                            <p>{t('lexicon.ai_requires_key') || 'AI Generation requires an API Key.'} <a href="https://github.com/zRinexD/KoreLang/" target="_blank" rel="noopener noreferrer" className="underline font-bold">{t('lexicon.docs') || 'Documentation'}</a>.</p>
                         </div>
                     )}
                 </div>

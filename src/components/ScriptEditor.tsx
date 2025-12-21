@@ -404,7 +404,7 @@ const ScriptEditor: React.FC<ScriptEditorProps> = ({ scriptConfig, setScriptConf
                                             }
                                         }}
                                         className="absolute -rotate-90 origin-center w-48 h-6 appearance-none cursor-pointer bg-transparent accent-purple-500 z-10"
-                                        style={{ left: '-66px', bottom: '84px' }}
+                                        style={{ left: '-84px', bottom: '84px' }}
                                     />
                                     <div className="absolute bottom-0 left-0 w-full bg-purple-600/20 pointer-events-none" style={{ height: `${(strokeWidth / 60) * 100}%` }}></div>
                                 </div>

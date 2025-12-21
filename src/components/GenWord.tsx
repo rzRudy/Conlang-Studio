@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Wand2, Download, Copy, RefreshCw, Trash } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Wand2, Download, Copy, RefreshCw, Trash, ShieldAlert } from 'lucide-react';
 import { generateWords } from '../services/geminiService';
 import { LexiconEntry, PartOfSpeech, ProjectConstraints, ScriptConfig } from '../types';
 import { useTranslation } from '../i18n';
@@ -29,6 +29,27 @@ const GenWord: React.FC<GenWordProps> = ({ onAddWords, onEditEntry, initialState
   const { generated, constraints, vibe, count } = initialState;
 
   const [loading, setLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null); // NEW: State for error messages
+
+  const loadingMessages = [
+    t('genword.loading_1'),
+    t('genword.loading_2'),
+    t('genword.loading_3')
+  ];
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (loading) {
+      let index = 0;
+      setLoadingMessage(loadingMessages[0]);
+      interval = setInterval(() => {
+        index = (index + 1) % loadingMessages.length;
+        setLoadingMessage(loadingMessages[index]);
+      }, 3000);
+    }
+    return () => clearInterval(interval);
+  }, [loading]);
 
   // Helper to update specific fields in parent state
   const updateState = (updates: Partial<GenWordState>) => {
@@ -37,10 +58,15 @@ const GenWord: React.FC<GenWordProps> = ({ onAddWords, onEditEntry, initialState
 
   const handleGenerate = async () => {
     setLoading(true);
-    // PASS projectConstraints to service
-    const results = await generateWords(count, constraints, vibe, projectConstraints);
-    // RTE-PERSISTENCE: Merge new results with existing ones
-    updateState({ generated: [...generated, ...results] });
+    setErrorMessage(null); // Clear previous errors
+    try {
+      const results = await generateWords(count, constraints, vibe, projectConstraints);
+      // RTE-PERSISTENCE: Merge new results with existing ones
+      updateState({ generated: [...generated, ...results] });
+    } catch (e: any) {
+      console.error("Error generating words in GenWord component:", e);
+      setErrorMessage(e.message || "An unknown error occurred during word generation.");
+    }
     setLoading(false);
   };
 
@@ -111,13 +137,13 @@ const GenWord: React.FC<GenWordProps> = ({ onAddWords, onEditEntry, initialState
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-400 mb-1">{t('genword.count')} (Max 100)</label>
+                <label className="block text-sm font-medium text-slate-400 mb-1">{t('genword.count')} (Max 15)</label>
                 <input
                   type="number"
                   min="1"
-                  max="100"
+                  max="15"
                   value={count}
-                  onChange={(e) => updateState({ count: Math.min(100, Math.max(1, Number(e.target.value))) })}
+                  onChange={(e) => updateState({ count: Math.min(15, Math.max(1, Number(e.target.value))) })}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-sm text-slate-200 focus:ring-2 focus:ring-purple-500 outline-none"
                 />
               </div>
@@ -128,7 +154,7 @@ const GenWord: React.FC<GenWordProps> = ({ onAddWords, onEditEntry, initialState
                 className="w-full bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-medium py-3 rounded-lg flex items-center justify-center gap-2 transition-all mt-4"
               >
                 {loading ? <RefreshCw className="animate-spin" /> : <Wand2 size={18} />}
-                {loading ? t('genword.dreaming') : t('genword.generate')}
+                {loading ? loadingMessage : t('genword.generate')}
               </button>
             </div>
           </div>
@@ -148,8 +174,15 @@ const GenWord: React.FC<GenWordProps> = ({ onAddWords, onEditEntry, initialState
             </div>
           </div>
 
+          {errorMessage && (
+            <div className="p-4 bg-red-950/20 border-b border-red-900/50 text-red-200 text-sm flex items-start gap-3">
+              <ShieldAlert size={16} className="shrink-0 text-red-400" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
+
           <div className="flex-1 overflow-y-auto p-4">
-            {generated.length === 0 ? (
+            {generated.length === 0 && !errorMessage ? (
               <div className="h-full flex flex-col items-center justify-center text-slate-600 space-y-3">
                 <div className="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center mb-2">
                   <Wand2 className="text-slate-500" size={32} />

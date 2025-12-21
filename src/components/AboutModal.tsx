@@ -47,7 +47,7 @@ const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
                         </p>
                         <div className="flex justify-center gap-4">
                             <a
-                                href="https://github.com/rzRudy/"
+                                href="https://github.com/zRinexD/"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex items-center gap-2 text-xs font-bold text-blue-400 hover:text-blue-300 transition-colors"
@@ -55,7 +55,7 @@ const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
                                 <Github size={14} /> GitHub
                             </a>
                             <a
-                                href="https://github.com/rzRudy/Conlang-Studio"
+                                href="https://github.com/zRinexD/KoreLang/"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex items-center gap-2 text-xs font-bold text-neutral-400 hover:text-neutral-200 transition-colors"

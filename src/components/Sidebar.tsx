@@ -11,7 +11,7 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ currentView, setView, onOpenProjectSettings, onToggleSidebar }) => {
-  const { t, direction } = useTranslation();
+  const { t } = useTranslation();
 
   const authoringItems = [
     { id: 'DASHBOARD', label: t('nav.dashboard'), icon: LayoutDashboard },
@@ -20,7 +20,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView, onOpenProjectSe
     { id: 'LEXICON', label: t('nav.lexicon'), icon: BookA },
     { id: 'GRAMMAR', label: t('nav.grammar'), icon: Languages },
     { id: 'GENEVOLVE', label: t('nav.genevolve'), icon: GitBranch },
-    { id: 'NOTEBOOK', label: 'Notebook', icon: BookOpen }, // NEW
+    { id: 'NOTEBOOK', label: t('nav.notebook'), icon: BookOpen },
   ];
 
   const systemItems = [

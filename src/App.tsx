@@ -16,7 +16,7 @@ import ConstraintsModal from './components/ConstraintsModal';
 import AboutModal from './components/AboutModal';
 import SettingsModal from './components/SettingsModal';
 import { ViewState, LexiconEntry, SoundChangeRule, ProjectData, AppSettings, MorphologyState, PhonologyConfig, ProjectConstraints, LogEntry, ScriptConfig } from './types';
-import { LanguageProvider, useTranslation } from './i18n';
+import { LanguageProvider, useTranslation, i18n } from './i18n';
 import { PanelLeftOpen, LayoutDashboard, Activity, BookA, Languages, GitBranch, Terminal, FileJson, Feather, BookOpen } from 'lucide-react';
 
 const STORAGE_KEY = 'conlang_studio_autosave';
@@ -70,7 +70,7 @@ const THEMES = {
 };
 
 const AppContent: React.FC = () => {
-  const { t, direction } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [currentView, setCurrentView] = useState<ViewState>('DASHBOARD');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isConstraintsOpen, setIsConstraintsOpen] = useState(false);
@@ -106,7 +106,7 @@ const AppContent: React.FC = () => {
   const [scriptConfig, setScriptConfig] = useState<ScriptConfig>(INITIAL_SCRIPT_CONFIG);
 
   const [genWordState, setGenWordState] = useState({
-    generated: [], constraints: t('defaults.gen_constraints'), vibe: t('defaults.gen_vibe'), count: 10
+    generated: [], constraints: '', vibe: '', count: 10
   });
 
   // Re-calibración: Zoom Global solo mediante Alt + Rueda del ratón
@@ -134,7 +134,7 @@ const AppContent: React.FC = () => {
 
   useEffect(() => {
     const themeData = settings.theme === 'custom' && settings.customTheme
-      ? settings.customTheme
+      ? settings.customTheme || THEMES.dark
       : (THEMES[settings.theme as keyof typeof THEMES] || THEMES.dark);
 
     const root = document.documentElement;
@@ -178,7 +178,7 @@ const AppContent: React.FC = () => {
   }, [projectName, projectAuthor, projectDescription, lexicon, grammar, morphology, phonology, rules, constraints, scriptConfig, isLoaded]);
 
   const handleWizardSubmit = (data: { name: string; author: string; description: string, constraints?: Partial<ProjectConstraints> }) => {
-    if (wizardMode === 'create' && confirm(t('wizard.overwrite_confirm'))) {
+    if (wizardMode === 'create' && (typeof window !== 'undefined' && confirm(t('wizard.overwrite_confirm')))) {
       setIsLoaded(false); localStorage.removeItem(STORAGE_KEY); setProjectSessionId(Date.now());
       setLexicon([]); setGrammar(t('defaults.grammar')); setMorphology({ dimensions: [], paradigms: [] });
       setPhonology({ name: t('defaults.phonology_name'), description: '', consonants: [], vowels: [], syllableStructure: '', bannedCombinations: [] });
@@ -207,7 +207,7 @@ const AppContent: React.FC = () => {
       case 'SCRIPT': return <ScriptEditor scriptConfig={scriptConfig} setScriptConfig={setScriptConfig} constraints={constraints} />;
       case 'NOTEBOOK': return <Notebook {...commonProps} />;
       case 'SOURCE': return <SourceView data={getFullProjectData()} onApply={(data) => { loadProjectData(data); alert('Project state synced.'); }} />;
-      default: return <Dashboard entries={lexicon} />;
+      default: return <Dashboard entries={lexicon} projectName={projectName} author={projectAuthor} description={projectDescription} setView={setCurrentView} {...commonProps} />;
     }
   };
 
@@ -215,7 +215,7 @@ const AppContent: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen w-screen bg-[var(--bg-main)] text-[var(--text-1)] font-sans overflow-hidden transition-colors duration-200">
-      <MenuBar onNewProject={() => { setWizardMode('create'); setIsWizardOpen(true); }} onSaveProject={() => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(getFullProjectData(), null, 2)], { type: 'application/json' })); a.download = `${projectName.toLowerCase().replace(/\s/g, '-')}.json`; a.click(); }} onOpenProject={(file) => { const r = new FileReader(); r.onload = (e) => loadProjectData(JSON.parse(e.target?.result as string)); r.readAsText(file); }} onOpenSettings={() => setIsSettingsOpen(true)} onOpenConstraints={() => setIsConstraintsOpen(true)} onZoomIn={() => setZoomLevel(p => Math.min(p + 10, 150))} onZoomOut={() => setZoomLevel(p => Math.max(p - 10, 50))} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} settings={settings} isScriptMode={isScriptMode} onToggleScriptMode={() => setIsScriptMode(!isScriptMode)} onOpenAbout={() => setIsAboutOpen(true)} />
+      <MenuBar onNewProject={() => { setWizardMode('create'); setIsWizardOpen(true); }} onSaveProject={() => { if (typeof window !== 'undefined') { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(getFullProjectData(), null, 2)], { type: 'application/json' })); a.download = `${projectName.toLowerCase().replace(/\s/g, '-')}.json`; a.click(); } }} onOpenProject={(file) => { const r = new FileReader(); r.onload = (e) => loadProjectData(JSON.parse(e.target?.result as string)); r.readAsText(file); }} onOpenSettings={() => setIsSettingsOpen(true)} onOpenConstraints={() => setIsConstraintsOpen(true)} onZoomIn={() => setZoomLevel(p => Math.min(p + 10, 150))} onZoomOut={() => setZoomLevel(p => Math.max(p - 10, 50))} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} settings={settings} isScriptMode={isScriptMode} onToggleScriptMode={() => setIsScriptMode(!isScriptMode)} onOpenAbout={() => setIsAboutOpen(true)} />
       <div className="flex flex-1 overflow-hidden relative">
         {isMobile && isSidebarOpen && <div className="absolute inset-0 bg-black/50 z-30 backdrop-blur-sm" onClick={() => setIsSidebarOpen(false)} />}
         {isSidebarOpen ? (
@@ -224,7 +224,7 @@ const AppContent: React.FC = () => {
           </div>
         ) : (
           <div className="flex-shrink-0 bg-[var(--bg-panel)] w-12 border-e border-neutral-700 flex flex-col items-center py-2 gap-1.5 z-20 overflow-y-auto no-scrollbar">
-            <button onClick={() => setIsSidebarOpen(true)} className="text-neutral-500 hover:text-white p-2 rounded hover:bg-neutral-800 transition-colors mb-1"><PanelLeftOpen size={18} className={direction === 'rtl' ? 'rotate-180' : ''} /></button>
+            <button onClick={() => setIsSidebarOpen(true)} className="text-neutral-500 hover:text-white p-2 rounded hover:bg-neutral-800 transition-colors mb-1"><PanelLeftOpen size={18} className={i18n.dir() === 'rtl' ? 'rotate-180' : ''} /></button>
             <div className="w-6 h-px bg-neutral-700 mb-1.5"></div>
             {navItems.map(item => (<button key={item.id} onClick={() => setCurrentView(item.id as ViewState)} className={`p-2 rounded transition-colors ${currentView === item.id ? 'text-blue-400 bg-neutral-800' : 'text-neutral-500 hover:text-neutral-200'}`} title={item.id}><item.icon size={18} /></button>))}
           </div>
@@ -247,5 +247,5 @@ const AppContent: React.FC = () => {
   );
 };
 
-const App: React.FC = () => (<LanguageProvider> <AppContent /> </LanguageProvider>);
+const App: React.FC = () => (<LanguageProvider i18n={i18n}> <AppContent /> </LanguageProvider>);
 export default App;

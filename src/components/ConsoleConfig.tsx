@@ -204,8 +204,9 @@ const ConsoleConfig: React.FC<ConsoleConfigProps> = ({
     useEffect(() => {
         if (history.length === 0) {
             clearTerminal();
+            handleCommand('HELP');
         }
-    }, []);
+    }, [history, t, clearTerminal]);
 
     const handleCommand = async (cmdStr: string) => {
         if (!cmdStr.trim()) return;
@@ -250,6 +251,7 @@ const ConsoleConfig: React.FC<ConsoleConfigProps> = ({
                     addLog('output', t('console.available_commands') || 'AVAILABLE COMMANDS:');
                     addLog('output', 'FIX-NON-CANON - ' + (t('console.help_fix') || 'Repairs words that violate the project rules.'));
                     addLog('output', 'CLEAR - ' + (t('console.help_clear') || 'Clears the terminal history.'));
+                    addLog('output', 'ABOUT - ' + (t('console.help_about') || 'Shows information about the application.'));
                     break;
                 case 'ABOUT':
                     addLog('output', t('msg.about_desc'));

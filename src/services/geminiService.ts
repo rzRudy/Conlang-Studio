@@ -33,7 +33,7 @@ const getGenAI = () => {
 /**
  * Sanitizes and parses JSON from Gemini, handling potential Markdown fences.
  */
-const safeParseJSON = (text: string) => {
+const safeParseJSON = (text: string): any => {
     try {
         let jsonString = text;
         // 1. Attempt to extract JSON from a markdown code block
@@ -78,6 +78,31 @@ const safeParseJSON = (text: string) => {
         return JSON.parse(jsonString);
     } catch (e) {
         console.error("JSON Parse Error. Raw content:", text);
+        throw e;
+    }
+};
+
+/**
+ * Parses raw text into a PhonologyConfig object, providing default values for missing fields.
+ */
+const safeParsePhonologyConfig = (text: string): PhonologyConfig => {
+    try {
+        const parsed = safeParseJSON(text);
+
+        // Ensure all PhonologyConfig fields are present with default values if missing or malformed
+        const phonologyConfig: PhonologyConfig = {
+            name: typeof parsed.name === 'string' ? parsed.name : '',
+            description: typeof parsed.description === 'string' ? parsed.description : '',
+            consonants: Array.isArray(parsed.consonants) ? parsed.consonants : [],
+            vowels: Array.isArray(parsed.vowels) ? parsed.vowels : [],
+            syllableStructure: typeof parsed.syllableStructure === 'string' ? parsed.syllableStructure : '',
+            bannedCombinations: Array.isArray(parsed.bannedCombinations) ? parsed.bannedCombinations : [],
+        };
+
+        return phonologyConfig;
+
+    } catch (e) {
+        console.error("Phonology Config Parse Error. Raw content:", text);
         throw e;
     }
 };
@@ -162,7 +187,7 @@ export const generateWords = async (
             model: "gemma-3-27b-it",
 
         });
-        const safeCount = Math.min(count, 100);
+        const safeCount = Math.min(count, 15);
         let globalRulesPrompt = "";
         if (projectRules) {
             const banned = projectRules.bannedSequences.length > 0 ? "Banned sequences: " + projectRules.bannedSequences.join(', ') + "." : "";
@@ -174,11 +199,16 @@ export const generateWords = async (
         console.log("Iniciando generación con el modelo gemma-3-27b-it...");
         const result = await model.generateContent("Generate " + safeCount + " unique constructed words. Vibe: " + vibe + ". " + globalRulesPrompt + ". Return JSON array with \"word\" and \"ipa\".");
         const response = await result.response;
-        return safeParseJSON(response.text());
+        const generatedWords = safeParseJSON(response.text());
+
+        if (!Array.isArray(generatedWords) || generatedWords.length === 0) {
+            throw new Error("No words could be generated. This might be due to overly restrictive constraints or an issue with the AI model. Please adjust your constraints and try again.");
+        }
+
+        return generatedWords;
     } catch (error: any) {
         console.error("Generation Error:", error?.message || error);
-        alert(`Error generando palabras: ${error?.message || 'Verifica tu API key en Settings'}`);
-        return [];
+        throw new Error(`Error generating words: ${error?.message || 'Verifica tu API key en Settings'}`);
     }
 };
 
@@ -275,11 +305,23 @@ export const generatePhonology = async (description: string): Promise<PhonologyC
         });
 
         console.log("Iniciando generación con el modelo gemma-3-27b-it...");
-        const result = await model.generateContent("Create phonology from description: \"" + description + "\". Return JSON complying with the app's PhonologyConfig schema.");
+        const result = await model.generateContent("Create phonology from description: \"" + description + "\". Your response MUST be a JSON object that strictly adheres to the PhonologyConfig TypeScript interface, including all fields. If a field has no data, use an empty array for lists (e.g., `consonants`, `vowels`, `bannedCombinations`) or an empty string for strings (e.g., `name`, `description`, `syllableStructure`). DO NOT include any conversational text, markdown fences (e.g., ```json), or extra characters, just the raw JSON object. Example of a complete PhonologyConfig JSON object: {\"name\":\"\", \"description\":\"\", \"consonants\":[], \"vowels\":[], \"syllableStructure\":\"\", \"bannedCombinations\":[]}");
         const response = await result.response;
-        return safeParseJSON(response.text());
+        const textResponse = response.text();
+        console.log("Raw AI response for phonology:", textResponse);
+        const parsedPhonology = safeParsePhonologyConfig(textResponse);
+        console.log("Parsed phonology from AI:", parsedPhonology);
+        return parsedPhonology;
     } catch (error: any) {
         console.error("Phonology Generation Error:", error?.message || error);
-        throw new Error("Failed to generate phonology: " + (error?.message || 'Verifica tu API key'));
+        // Return a default PhonologyConfig on error to prevent crashes and provide a usable empty state
+        return {
+            name: "Default Phonology",
+            description: "Failed to generate phonology. Please check your API key and prompt.",
+            consonants: [],
+            vowels: [],
+            syllableStructure: "CV",
+            bannedCombinations: [],
+        };
     }
 };
