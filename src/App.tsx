@@ -11,9 +11,10 @@ import ConsoleConfig from './components/ConsoleConfig';
 import SourceView from './components/SourceView';
 import ScriptEditor from './components/ScriptEditor';
 import Notebook from './components/Notebook';
-import SettingsModal from './components/SettingsModal';
 import ProjectWizard from './components/ProjectWizard';
 import ConstraintsModal from './components/ConstraintsModal';
+import AboutModal from './components/AboutModal';
+import SettingsModal from './components/SettingsModal';
 import { ViewState, LexiconEntry, SoundChangeRule, ProjectData, AppSettings, MorphologyState, PhonologyConfig, ProjectConstraints, LogEntry, ScriptConfig } from './types';
 import { LanguageProvider, useTranslation } from './i18n';
 import { PanelLeftOpen, LayoutDashboard, Activity, BookA, Languages, GitBranch, Terminal, FileJson, Feather, BookOpen } from 'lucide-react';
@@ -73,6 +74,7 @@ const AppContent: React.FC = () => {
   const [currentView, setCurrentView] = useState<ViewState>('DASHBOARD');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isConstraintsOpen, setIsConstraintsOpen] = useState(false);
+  const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   const [projectSessionId, setProjectSessionId] = useState<number>(Date.now());
@@ -86,10 +88,7 @@ const AppContent: React.FC = () => {
   const [zoomLevel, setZoomLevel] = useState(100);
   const [jumpToTerm, setJumpToTerm] = useState<string | null>(null);
   const [draftEntry, setDraftEntry] = useState<Partial<LexiconEntry> | null>(null);
-  const [consoleHistory, setConsoleHistory] = useState<LogEntry[]>([
-    { type: 'info', content: `Conlang Studio OS v1.0.0 [Proportional-Engine Active]`, timestamp: '' },
-    { type: 'info', content: 'Type "HELP" for available commands.', timestamp: '' },
-  ]);
+  const [consoleHistory, setConsoleHistory] = useState<LogEntry[]>([]);
 
   const [settings, setSettings] = useState<AppSettings>({
     theme: 'dark',
@@ -204,7 +203,7 @@ const AppContent: React.FC = () => {
       case 'LEXICON': return <Lexicon entries={lexicon} setEntries={setLexicon} constraints={constraints} enableAI={settings.enableAI} phonology={phonology} genWordState={genWordState} setGenWordState={setGenWordState} jumpToTerm={jumpToTerm} setJumpToTerm={setJumpToTerm} draftEntry={draftEntry} setDraftEntry={setDraftEntry} {...commonProps} />;
       case 'GRAMMAR': return <GrammarEditor grammar={grammar} setGrammar={setGrammar} morphology={morphology} setMorphology={setMorphology} showLineNumbers={settings.showLineNumbers} {...commonProps} />;
       case 'GENEVOLVE': return <GenEvolve entries={lexicon} onUpdateEntries={setLexicon} rules={rules} setRules={setRules} {...commonProps} />;
-      case 'CONSOLE': return <ConsoleConfig constraints={constraints} setConstraints={setConstraints} settings={settings} setSettings={setSettings} entries={lexicon} setEntries={setLexicon} history={consoleHistory} setHistory={setConsoleHistory} setProjectName={setProjectName} setProjectDescription={setProjectDescription} setProjectAuthor={setProjectAuthor} setIsSidebarOpen={setIsSidebarOpen} setView={setCurrentView} setJumpToTerm={setJumpToTerm} setDraftEntry={setDraftEntry} {...commonProps} />;
+      case 'CONSOLE': return <ConsoleConfig constraints={constraints} setConstraints={setConstraints} settings={settings} setSettings={setSettings} entries={lexicon} setEntries={setLexicon} history={consoleHistory} setHistory={setConsoleHistory} setProjectName={setProjectName} setProjectDescription={setProjectDescription} setProjectAuthor={setProjectAuthor} setIsSidebarOpen={setIsSidebarOpen} setView={setCurrentView} setJumpToTerm={setJumpToTerm} setDraftEntry={setDraftEntry} author={projectAuthor} {...commonProps} />;
       case 'SCRIPT': return <ScriptEditor scriptConfig={scriptConfig} setScriptConfig={setScriptConfig} constraints={constraints} />;
       case 'NOTEBOOK': return <Notebook {...commonProps} />;
       case 'SOURCE': return <SourceView data={getFullProjectData()} onApply={(data) => { loadProjectData(data); alert('Project state synced.'); }} />;
@@ -216,7 +215,7 @@ const AppContent: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen w-screen bg-[var(--bg-main)] text-[var(--text-1)] font-sans overflow-hidden transition-colors duration-200">
-      <MenuBar onNewProject={() => { setWizardMode('create'); setIsWizardOpen(true); }} onSaveProject={() => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(getFullProjectData(), null, 2)], { type: 'application/json' })); a.download = `${projectName.toLowerCase().replace(/\s/g, '-')}.json`; a.click(); }} onOpenProject={(file) => { const r = new FileReader(); r.onload = (e) => loadProjectData(JSON.parse(e.target?.result as string)); r.readAsText(file); }} onOpenSettings={() => setIsSettingsOpen(true)} onOpenConstraints={() => setIsConstraintsOpen(true)} onZoomIn={() => setZoomLevel(p => Math.min(p + 10, 150))} onZoomOut={() => setZoomLevel(p => Math.max(p - 10, 50))} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} settings={settings} isScriptMode={isScriptMode} onToggleScriptMode={() => setIsScriptMode(!isScriptMode)} />
+      <MenuBar onNewProject={() => { setWizardMode('create'); setIsWizardOpen(true); }} onSaveProject={() => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(getFullProjectData(), null, 2)], { type: 'application/json' })); a.download = `${projectName.toLowerCase().replace(/\s/g, '-')}.json`; a.click(); }} onOpenProject={(file) => { const r = new FileReader(); r.onload = (e) => loadProjectData(JSON.parse(e.target?.result as string)); r.readAsText(file); }} onOpenSettings={() => setIsSettingsOpen(true)} onOpenConstraints={() => setIsConstraintsOpen(true)} onZoomIn={() => setZoomLevel(p => Math.min(p + 10, 150))} onZoomOut={() => setZoomLevel(p => Math.max(p - 10, 50))} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} settings={settings} isScriptMode={isScriptMode} onToggleScriptMode={() => setIsScriptMode(!isScriptMode)} onOpenAbout={() => setIsAboutOpen(true)} />
       <div className="flex flex-1 overflow-hidden relative">
         {isMobile && isSidebarOpen && <div className="absolute inset-0 bg-black/50 z-30 backdrop-blur-sm" onClick={() => setIsSidebarOpen(false)} />}
         {isSidebarOpen ? (
@@ -243,6 +242,7 @@ const AppContent: React.FC = () => {
       <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} settings={settings} onUpdateSettings={setSettings} />
       <ConstraintsModal isOpen={isConstraintsOpen} onClose={() => setIsConstraintsOpen(false)} constraints={constraints} onUpdateConstraints={setConstraints} {...{ scriptConfig, isScriptMode }} />
       <ProjectWizard isOpen={isWizardOpen} mode={wizardMode} initialData={{ name: wizardMode === 'create' ? '' : projectName, author: wizardMode === 'create' ? '' : projectAuthor, description: wizardMode === 'create' ? '' : projectDescription }} onClose={() => setIsWizardOpen(false)} onSubmit={handleWizardSubmit} />
+      <AboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
     </div>
   );
 };

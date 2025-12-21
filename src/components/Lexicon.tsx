@@ -417,18 +417,18 @@ const Lexicon: React.FC<LexiconProps> = ({
                                     {parent ? (
                                         <div className="flex items-center gap-2 text-neutral-400">
                                             <Link size={12} />
-                                            <span>{t('lexicon.derivedFrom')}:</span>
+                                            <span>{t('lexicon.derived_from') || 'Derived From'}:</span>
                                             <button onClick={() => jumpToWord(parent.word)} className="text-amber-500 hover:text-amber-400 font-bold hover:underline flex items-center gap-1">{parent.word}</button>
                                         </div>
                                     ) : (
-                                        <span className="text-xs uppercase font-bold tracking-widest border border-neutral-700 px-1 rounded text-neutral-600">Root</span>
+                                        <span className="text-xs uppercase font-bold tracking-widest border border-neutral-700 px-1 rounded text-neutral-600">{t('lexicon.root') || 'Root'}</span>
                                     )}
                                     {descendants.length > 0 && (
                                         <>
                                             {parent && <span className="mx-2 text-neutral-700">|</span>}
                                             <div className="flex items-center gap-2 text-neutral-400">
                                                 <GitFork size={12} />
-                                                <span>{t('lexicon.descendants')}:</span>
+                                                <span>{t('lexicon.descendants') || 'Descendants'}:</span>
                                                 <div className="flex flex-wrap gap-2">
                                                     {descendants.map(desc => (
                                                         <button key={desc.id} onClick={() => jumpToWord(desc.word)} className="bg-neutral-800 hover:bg-neutral-700 text-blue-300 px-2 py-0.5 rounded text-xs transition-colors">{desc.word}</button>
@@ -448,7 +448,7 @@ const Lexicon: React.FC<LexiconProps> = ({
                         <button
                             onClick={() => handleCopyText(entry)}
                             className="p-2 text-neutral-400 hover:bg-neutral-800 hover:text-white rounded-md transition-colors relative border border-transparent hover:border-neutral-700"
-                            title="Copy Latin Text"
+                            title={t('lexicon.copy_latin') || "Copy Latin Text"}
                         >
                             {copiedId === `${entry.id}-text` ? <Check size={16} className="text-emerald-500" /> : <Type size={16} />}
                         </button>
@@ -458,7 +458,7 @@ const Lexicon: React.FC<LexiconProps> = ({
                             <button
                                 onClick={() => handleCopyScript(entry)}
                                 className="p-2 text-purple-400 hover:bg-purple-900/30 hover:text-purple-200 rounded-md transition-colors relative border border-transparent hover:border-purple-500/50"
-                                title="Copy Native Script Symbols (PUA)"
+                                title={t('lexicon.copy_native') || "Copy Native Script Symbols (PUA)"}
                             >
                                 {copiedId === `${entry.id}-script` ? <Check size={16} className="text-emerald-500" /> : <Feather size={16} />}
                             </button>
@@ -486,7 +486,7 @@ const Lexicon: React.FC<LexiconProps> = ({
                     {!isApiKeySet() && (
                         <div className="flex-1 bg-amber-950/20 border border-amber-900/50 rounded-lg p-2 text-xs text-amber-200 flex items-center gap-3">
                             <ShieldAlert size={14} className="shrink-0 text-amber-500" />
-                            <p>AI Generation requires an API Key. Check the <a href="https://github.com/rzRudy/Conlang-Studio" target="_blank" rel="noopener noreferrer" className="underline font-bold">Documentation</a>.</p>
+                            <p>{t('lexicon.ai_requires_key') || 'AI Generation requires an API Key.'} <a href="https://github.com/rzRudy/Conlang-Studio" target="_blank" rel="noopener noreferrer" className="underline font-bold">{t('lexicon.docs') || 'Documentation'}</a>.</p>
                         </div>
                     )}
                 </div>
@@ -559,7 +559,7 @@ const Lexicon: React.FC<LexiconProps> = ({
                                 <Filter size={14} className="text-neutral-500" />
                                 <span className="text-xs font-bold text-neutral-500 uppercase">{t('lexicon.pos')}:</span>
                                 <select value={posFilter} onChange={(e) => setPosFilter(e.target.value)} className="bg-neutral-900 border border-neutral-700 text-neutral-200 text-xs rounded px-2 py-1 outline-none focus:border-blue-500">
-                                    <option value="ALL">{t('val.any_pos')}</option>
+                                    <option value="ALL">{t('val.any_pos') || 'Any POS'}</option>
                                     {POS_SUGGESTIONS.map(pos => <option key={pos} value={pos}>{getPosLabel(pos)}</option>)}
                                 </select>
                             </div>
@@ -741,7 +741,7 @@ const Lexicon: React.FC<LexiconProps> = ({
                             </div>
                             <div className="space-y-1">
                                 <label className="text-xs font-semibold text-neutral-400 uppercase">{t('lexicon.pos')}</label>
-                                <Combobox value={newPOS} onChange={setNewPOS} options={POS_SUGGESTIONS} placeholder={t('pos.placeholder')} renderOption={(opt) => getPosLabel(opt)} />
+                                <Combobox value={newPOS} onChange={setNewPOS} options={POS_SUGGESTIONS} placeholder={t('lexicon.pos_placeholder') || 'Select POS...'} renderOption={(opt) => getPosLabel(opt)} />
                             </div>
                             <div className="space-y-1">
                                 <label className="text-xs font-semibold text-neutral-400 uppercase">{t('lexicon.definition')}</label>
@@ -753,7 +753,7 @@ const Lexicon: React.FC<LexiconProps> = ({
                                     <div className="space-y-1">
                                         <label className="text-[10px] font-semibold text-neutral-500 uppercase">{t('lexicon.derivedFrom')}</label>
                                         <select value={newDerivedFrom} onChange={(e) => setNewDerivedFrom(e.target.value)} className="w-full bg-neutral-950 border border-neutral-700 rounded p-2 text-neutral-300 focus:border-blue-500 focus:outline-none">
-                                            <option value="">{t('lexicon.root')}</option>
+                                            <option value="">{t('lexicon.root_option') || '-- Root --'}</option>
                                             {entries.sort((a, b) => a.word.localeCompare(b.word)).map(e => <option key={e.id} value={e.id}>{e.word} ({getPosLabel(e.pos)})</option>)}
                                         </select>
                                     </div>

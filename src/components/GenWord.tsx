@@ -6,10 +6,10 @@ import { useTranslation } from '../i18n';
 import { ConScriptText } from './ConScriptRenderer';
 
 interface GenWordState {
-    generated: Array<{ word: string, ipa: string }>;
-    constraints: string;
-    vibe: string;
-    count: number;
+  generated: Array<{ word: string, ipa: string }>;
+  constraints: string;
+  vibe: string;
+  count: number;
 }
 
 interface GenWordProps {
@@ -24,15 +24,15 @@ interface GenWordProps {
 
 const GenWord: React.FC<GenWordProps> = ({ onAddWords, onEditEntry, initialState, saveState, projectConstraints, scriptConfig, isScriptMode = false }) => {
   const { t } = useTranslation();
-  
+
   // Use state lifted from parent
   const { generated, constraints, vibe, count } = initialState;
-  
+
   const [loading, setLoading] = useState(false);
 
   // Helper to update specific fields in parent state
   const updateState = (updates: Partial<GenWordState>) => {
-      saveState({ ...initialState, ...updates });
+    saveState({ ...initialState, ...updates });
   };
 
   const handleGenerate = async () => {
@@ -47,29 +47,29 @@ const GenWord: React.FC<GenWordProps> = ({ onAddWords, onEditEntry, initialState
   const handleAdd = (word: string, ipa: string) => {
     // If edit callback exists (Lexicon parent), use it
     if (onEditEntry) {
-        onEditEntry({
-            word,
-            ipa,
-            pos: 'Noun',
-            definition: ''
-        });
+      onEditEntry({
+        word,
+        ipa,
+        pos: 'Noun',
+        definition: ''
+      });
     } else {
-        // Fallback to auto-add (unlikely path in new UI but safe)
-        onAddWords([{
-            id: Date.now().toString() + Math.random(),
-            word,
-            ipa,
-            pos: 'Noun', 
-            definition: 'TODO: Define this word'
-        }]);
+      // Fallback to auto-add (unlikely path in new UI but safe)
+      onAddWords([{
+        id: Date.now().toString() + Math.random(),
+        word,
+        ipa,
+        pos: 'Noun',
+        definition: 'TODO: Define this word'
+      }]);
     }
-    
+
     // Remove from list after adding
     updateState({ generated: generated.filter(w => w.word !== word) });
   };
 
   const handleClear = () => {
-      updateState({ generated: [] });
+    updateState({ generated: [] });
   };
 
   return (
@@ -87,7 +87,7 @@ const GenWord: React.FC<GenWordProps> = ({ onAddWords, onEditEntry, initialState
         <div className="lg:col-span-1 space-y-6">
           <div className="bg-slate-900 p-6 rounded-xl border border-slate-800 shadow-lg">
             <h3 className="text-lg font-semibold text-slate-200 mb-4 border-b border-slate-800 pb-2">{t('genword.config')}</h3>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-slate-400 mb-1">{t('genword.constraints')}</label>
@@ -111,13 +111,13 @@ const GenWord: React.FC<GenWordProps> = ({ onAddWords, onEditEntry, initialState
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-400 mb-1">{t('genword.count')} (Max 50)</label>
+                <label className="block text-sm font-medium text-slate-400 mb-1">{t('genword.count')} (Max 100)</label>
                 <input
                   type="number"
                   min="1"
-                  max="50"
+                  max="100"
                   value={count}
-                  onChange={(e) => updateState({ count: Math.min(50, Math.max(1, Number(e.target.value))) })}
+                  onChange={(e) => updateState({ count: Math.min(100, Math.max(1, Number(e.target.value))) })}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-sm text-slate-200 focus:ring-2 focus:ring-purple-500 outline-none"
                 />
               </div>
@@ -139,44 +139,44 @@ const GenWord: React.FC<GenWordProps> = ({ onAddWords, onEditEntry, initialState
           <div className="p-4 bg-slate-800/50 border-b border-slate-700 flex justify-between items-center">
             <h3 className="font-semibold text-slate-200">{t('genword.results')}</h3>
             <div className="flex items-center gap-3">
-                <span className="text-xs text-slate-500 bg-slate-900 px-2 py-1 rounded">{generated.length} {t('genword.keep')}</span>
-                {generated.length > 0 && (
-                    <button onClick={handleClear} className="text-xs text-red-400 hover:text-red-300 flex items-center gap-1">
-                        <Trash size={12} /> {t('genword.clear')}
-                    </button>
-                )}
+              <span className="text-xs text-slate-500 bg-slate-900 px-2 py-1 rounded">{generated.length} {t('genword.keep')}</span>
+              {generated.length > 0 && (
+                <button onClick={handleClear} className="text-xs text-red-400 hover:text-red-300 flex items-center gap-1">
+                  <Trash size={12} /> {t('genword.clear')}
+                </button>
+              )}
             </div>
           </div>
-          
+
           <div className="flex-1 overflow-y-auto p-4">
-             {generated.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-slate-600 space-y-3">
-                    <div className="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center mb-2">
-                        <Wand2 className="text-slate-500" size={32} />
+            {generated.length === 0 ? (
+              <div className="h-full flex flex-col items-center justify-center text-slate-600 space-y-3">
+                <div className="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center mb-2">
+                  <Wand2 className="text-slate-500" size={32} />
+                </div>
+                <p>{t('genword.placeholder')}</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {generated.map((item, idx) => (
+                  <div key={idx} className="bg-slate-950 border border-slate-800 p-3 rounded flex justify-between items-center group hover:border-purple-500/50 transition-colors">
+                    <div>
+                      <div className={`text-lg font-bold ${isScriptMode ? 'text-purple-300' : 'text-slate-200'}`}>
+                        <ConScriptText text={item.word} scriptConfig={isScriptMode ? scriptConfig : undefined} />
+                      </div>
+                      <div className="text-sm text-slate-500 font-mono">/{item.ipa}/</div>
                     </div>
-                    <p>{t('genword.placeholder')}</p>
-                </div>
-             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {generated.map((item, idx) => (
-                        <div key={idx} className="bg-slate-950 border border-slate-800 p-3 rounded flex justify-between items-center group hover:border-purple-500/50 transition-colors">
-                            <div>
-                                <div className={`text-lg font-bold ${isScriptMode ? 'text-purple-300' : 'text-slate-200'}`}>
-                                    <ConScriptText text={item.word} scriptConfig={scriptConfig} />
-                                </div>
-                                <div className="text-sm text-slate-500 font-mono">/{item.ipa}/</div>
-                            </div>
-                            <button 
-                                onClick={() => handleAdd(item.word, item.ipa)}
-                                className="p-2 bg-slate-800 hover:bg-green-600 text-slate-400 hover:text-white rounded transition-colors"
-                                title="Edit & Add to Dictionary"
-                            >
-                                <Download size={16} />
-                            </button>
-                        </div>
-                    ))}
-                </div>
-             )}
+                    <button
+                      onClick={() => handleAdd(item.word, item.ipa)}
+                      className="p-2 bg-slate-800 hover:bg-green-600 text-slate-400 hover:text-white rounded transition-colors"
+                      title={t('genword.edit_add') || "Edit & Add to Dictionary"}
+                    >
+                      <Download size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

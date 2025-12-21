@@ -1,17 +1,18 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-export type Language = 'en' | 'es' | 'it' | 'fr' | 'pt' | 'de' | 'zh' | 'ja' | 'ko' | 'id' | 'vi' | 'ur' | 'hi' | 'ru' | 'ar' | 'bn' | 'pa' | 'sd';
+export type Language = 'en';
 
 export type Direction = 'ltr' | 'rtl';
 
 const translations: Record<string, Record<string, string>> = {
     en: {
-        'app.title': 'Conlang Studio',
-        'app.subtitle': 'Professional Edition',
+        'app.title': 'KoreLang',
+        'app.subtitle': '',
         'common.confirm': 'Are you sure?',
         'common.done': 'Done',
         'common.cancel': 'Cancel',
+        'common.apply': 'Apply Changes',
         'common.delete': 'Delete',
         'nav.dashboard': 'Dashboard',
         'nav.phonology': 'Phonology Engine',
@@ -22,13 +23,22 @@ const translations: Record<string, Record<string, string>> = {
         'nav.source': 'Source Code',
         'nav.script': 'Script Editor',
         'nav.notebook': 'Notebook',
+        'console.placeholder': 'Waiting for instruction...',
+        'console.refactor_complete': 'Refactoring complete and integrated.',
+        'console.review_proposals': 'Review Proposals',
+        'console.no_violations': 'The lexicon complies with current phonotactic rules.',
+        'console.analyzing': 'Analyzing',
+        'console.violations': 'violations',
+        'console.available_commands': 'AVAILABLE COMMANDS:',
+        'console.help_fix': 'Repairs words that violate project rules.',
+        'console.help_clear': 'Clears terminal history.',
         'settings.title': 'Settings',
         'menu.toggle_sidebar': 'Toggle Sidebar',
         'defaults.project_name': 'New Conlang',
         'defaults.author': 'Linguist',
         'defaults.grammar': '// Define your grammar here',
         'defaults.phonology_name': 'Standard Phonology',
-        'defaults.gen_constraints': '',
+        'defaults.gen_constraints': 'CV',
         'defaults.gen_vibe': 'ancient',
         'pos.Noun': 'Noun',
         'pos.Verb': 'Verb',
@@ -49,8 +59,9 @@ const translations: Record<string, Record<string, string>> = {
         'lexicon.pos': 'Part of Speech',
         'lexicon.definition': 'Definition',
         'lexicon.etymology': 'Etymology',
-        'lexicon.derivedFrom': 'Derived From',
-        'lexicon.root': '-- Root --',
+        'lexicon.derived_from': 'Derived From',
+        'lexicon.root': 'Root',
+        'lexicon.root_option': '-- Root --',
         'lexicon.conflicts_group': 'Conflicts',
         'lexicon.view_mode_pinned': 'Pin Conflicts',
         'lexicon.view_mode_hide': 'Hide Conflicts',
@@ -61,6 +72,10 @@ const translations: Record<string, Record<string, string>> = {
         'lexicon.no_matches': 'No matches found.',
         'lexicon.try_adjust': 'Try adjusting filters.',
         'lexicon.descendants': 'Descendants',
+        'lexicon.copy_latin': 'Copy Latin Text',
+        'lexicon.copy_native': 'Copy Native Script Symbols (PUA)',
+        'lexicon.ai_requires_key': 'AI Generation requires an API Key.',
+        'lexicon.pos_placeholder': 'Select POS...',
         'lexicon.delete_confirm_title': 'Delete Entry?',
         'lexicon.delete_confirm_desc': 'Delete word?',
         'lexicon.action_cannot_undo': 'Action cannot be undone.',
@@ -68,6 +83,12 @@ const translations: Record<string, Record<string, string>> = {
         'lexicon.search_in': 'Search In',
         'lexicon.non_canon': 'Non-Canon',
         'val.errors_title': 'Validation Errors',
+        'val.desc': 'Configure project integrity rules and phonotactics.',
+        'val.any_pos': '-- Any POS --',
+        'tab.general': 'General',
+        'tab.phonotactics': 'Phonotactics',
+        'tab.orthography': 'Orthography',
+        'tab.sorting': 'Sorting',
         'integrity.title': 'Integrity Warning',
         'integrity.warning': 'Dependents found.',
         'integrity.desc': 'This action may break references.',
@@ -87,6 +108,7 @@ const translations: Record<string, Record<string, string>> = {
         'genword.keep': 'Keep',
         'genword.clear': 'Clear',
         'genword.placeholder': 'No words generated yet.',
+        'genword.edit_add': 'Edit & Add to Dictionary',
         'genevolve.commit_alert': 'Changes committed.',
         'genevolve.title': 'Evolution',
         'genevolve.desc': 'Apply sound changes',
@@ -117,6 +139,8 @@ const translations: Record<string, Record<string, string>> = {
         'dashboard.recent_words': 'Recent Activity',
         'dashboard.pos_dist': 'POS Distribution',
         'dashboard.no_data': 'No data available.',
+        'dashboard.empty_dict': 'Lexicon is empty. Start by adding a word.',
+        'dashboard.create_first': 'Create the first word now.',
         'wizard.overwrite_confirm': 'Overwrite current project?',
         'menu.file': 'File',
         'menu.new_project': 'New',
@@ -199,95 +223,24 @@ const translations: Record<string, Record<string, string>> = {
         'phonology.vowels': 'Vowels',
         'phonology.syllable_struct': 'Structure',
         'phonology.undefined': 'Undefined',
-        'msg.about_title': 'Conlang Studio',
-        'msg.about_desc': 'The world\'s most advanced conlang IDE.'
-    },
-    es: {
-        'app.title': 'Conlang Studio',
-        'app.subtitle': 'Edición Profesional',
-        'nav.dashboard': 'Panel de Control',
-        'nav.lexicon': 'Léxico',
-        'nav.grammar': 'Gramática',
-        'nav.script': 'Editor de Escritura',
-        'settings.title': 'Ajustes',
-        'pos.Noun': 'Sustantivo',
-        'pos.Verb': 'Verbo',
-        'pos.Adjective': 'Adjetivo',
-        'pos.Adverb': 'Adverbio',
-        'common.confirm': '¿Estás seguro?',
-        'common.delete': 'Eliminar'
-    },
-    it: {
-        'app.title': 'Conlang Studio',
-        'app.subtitle': 'Edizione Professionale',
-        'nav.dashboard': 'Dashboard',
-        'nav.lexicon': 'Lessico',
-        'nav.grammar': 'Grammatica',
-        'settings.title': 'Impostazioni'
-    },
-    fr: {
-        'app.title': 'Conlang Studio',
-        'app.subtitle': 'Édition Professionnelle',
-        'nav.dashboard': 'Tableau de Bord',
-        'nav.lexicon': 'Lexique',
-        'nav.grammar': 'Grammaire',
-        'settings.title': 'Paramètres'
-    },
-    pt: {
-        'app.title': 'Conlang Studio',
-        'app.subtitle': 'Edição Profissional',
-        'nav.dashboard': 'Painel',
-        'nav.lexicon': 'Léxico',
-        'nav.grammar': 'Gramática',
-        'settings.title': 'Configurações'
-    },
-    de: {
-        'app.title': 'Conlang Studio',
-        'app.subtitle': 'Profi-Edition',
-        'nav.dashboard': 'Dashboard',
-        'nav.lexicon': 'Lexikon',
-        'nav.grammar': 'Grammatik',
-        'settings.title': 'Einstellungen'
-    },
-    zh: {
-        'app.title': '语言创作室',
-        'app.subtitle': '专业版',
-        'nav.dashboard': '仪表板',
-        'nav.lexicon': '词汇表',
-        'nav.grammar': '语法与句法',
-        'settings.title': '设置'
-    },
-    ja: {
-        'app.title': 'コンラン・スタジオ',
-        'app.subtitle': 'プロフェッショナル版',
-        'nav.dashboard': 'ダッシュボード',
-        'nav.lexicon': '語彙',
-        'nav.grammar': '文法と構文',
-        'settings.title': '設定'
-    },
-    ko: {
-        'app.title': '콘랑 스튜디오',
-        'app.subtitle': '프로페셔널 에디션',
-        'nav.dashboard': '대시보드',
-        'nav.lexicon': '어휘',
-        'nav.grammar': '문법 및 구문',
-        'settings.title': '설정'
-    },
-    ru: {
-        'app.title': 'Конланг Студио',
-        'app.subtitle': 'Профессиональное издание',
-        'nav.dashboard': 'Панель управления',
-        'nav.lexicon': 'Лексикон',
-        'nav.grammar': 'Грамматика',
-        'settings.title': 'Настройки'
-    },
-    ar: {
-        'app.title': 'استوديو كونلانج',
-        'app.subtitle': 'نسخة احترافية',
-        'nav.dashboard': 'لوحة القيادة',
-        'nav.lexicon': 'المعجم',
-        'nav.grammar': 'القواعد والنحو',
-        'settings.title': 'الإعدادات'
+        'msg.about_title': 'KoreLang',
+        'msg.about_desc': 'Developed by zRinexD (https://github.com/rzRudy/)',
+        'settings.api_key': 'Gemini API Key',
+        'settings.api_key_ph': 'Paste your API key here...',
+        'settings.api_key_help': 'How to get a free API Key?',
+        'settings.api_key_required': 'API Key is required for Intelligence features',
+        'settings.finalize': 'Finalize Changes',
+        'settings.help_title': 'Guide: Obtaining API Key',
+        'settings.help_subtitle': 'Follow these steps to activate AI features:',
+        'settings.help_back': 'Back',
+        'settings.help_step_1': 'Go to Google AI Studio',
+        'settings.help_step_2': 'Sign in with a Google account',
+        'settings.help_step_3': 'Click on "Get API Key" in the sidebar',
+        'settings.help_step_4': 'Click on "Create API Key in new project"',
+        'settings.help_step_5': 'Copy the generated key and paste it in the field',
+        'settings.open_ai_studio': 'Open Google AI Studio',
+        'settings.help_is_free': 'Is it free?',
+        'settings.help_free_desc': 'Yes, the Gemini free tier is generous and sufficient for most projects.'
     }
 };
 
@@ -304,7 +257,8 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
     const [language, setLanguage] = useState<Language>('en');
 
     const t = (key: string): string => {
-        return translations[language]?.[key] || translations['en']?.[key] || key;
+        const langPack = translations[language] || translations['en'];
+        return langPack.hasOwnProperty(key) ? langPack[key] : key;
     };
 
     const direction: Direction = ['ar', 'ur', 'sd', 'pa'].includes(language) ? 'rtl' : 'ltr';

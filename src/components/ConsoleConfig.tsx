@@ -37,9 +37,10 @@ interface RepairTableProps {
     originalEntries: LexiconEntry[];
     onCommit: (repairedList: Array<{ id: string, word: string, ipa: string }>) => void;
     onCancel: () => void;
+    t: (key: string) => string;
 }
 
-const RepairReviewTable: React.FC<RepairTableProps> = ({ repairs, originalEntries, onCommit, onCancel }) => {
+const RepairReviewTable: React.FC<RepairTableProps> = ({ repairs, originalEntries, onCommit, onCancel, t }) => {
     const [localRepairs, setLocalRepairs] = useState(repairs);
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set(repairs.map(r => r.id)));
     const [isApplied, setIsApplied] = useState(false);
@@ -58,7 +59,7 @@ const RepairReviewTable: React.FC<RepairTableProps> = ({ repairs, originalEntrie
     if (isApplied) {
         return (
             <div className="py-2 px-4 bg-emerald-950/20 border border-emerald-900/50 rounded flex items-center gap-2 text-emerald-400 text-xs font-bold">
-                <CheckCircle2 size={14} /> Refactorización completada e integrada.
+                <CheckCircle2 size={14} /> {t('console.refactor_complete') || 'Refactoring complete and integrated.'}
             </div>
         );
     }
@@ -70,9 +71,9 @@ const RepairReviewTable: React.FC<RepairTableProps> = ({ repairs, originalEntrie
         >
             <div className="bg-zinc-800 px-4 py-2 border-b border-zinc-700 flex justify-between items-center">
                 <span className="text-xs font-bold text-zinc-300 uppercase tracking-widest flex items-center gap-2">
-                    <ShieldAlert size={12} className="text-amber-500" /> STAGING v4.6: REVISIÓN DE PROPUESTAS
+                    <ShieldAlert size={12} className="text-amber-500" /> STAGING v4.6: {t('console.review_proposals') || 'REVIEW PROPOSALS'}
                 </span>
-                <span className="text-[10px] text-zinc-500">{selectedIds.size} seleccionados</span>
+                <span className="text-[10px] text-zinc-500">{selectedIds.size} {t('lexicon.results_count') || 'selected'}</span>
             </div>
             <div className="max-h-80 overflow-y-auto custom-scrollbar">
                 <table className="w-full text-[11px]">
@@ -125,7 +126,7 @@ const RepairReviewTable: React.FC<RepairTableProps> = ({ repairs, originalEntrie
                 </table>
             </div>
             <div className="p-3 bg-black/40 border-t border-zinc-700 flex justify-end gap-2">
-                <button onClick={onCancel} className="px-3 py-1.5 text-[10px] font-bold text-zinc-500 hover:text-zinc-300">Descartar</button>
+                <button onClick={onCancel} className="px-3 py-1.5 text-[10px] font-bold text-zinc-500 hover:text-zinc-300">{t('common.cancel')}</button>
                 <button
                     onClick={() => {
                         const finalRepairs = localRepairs.filter(r => selectedIds.has(r.id));
@@ -134,7 +135,7 @@ const RepairReviewTable: React.FC<RepairTableProps> = ({ repairs, originalEntrie
                     }}
                     className="px-4 py-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded text-[10px] font-bold shadow-lg flex items-center gap-2"
                 >
-                    Aplicar Cambios ({selectedIds.size})
+                    {t('common.apply') || 'Apply Changes'} ({selectedIds.size})
                 </button>
             </div>
         </div>
@@ -159,11 +160,21 @@ interface ConsoleConfigProps {
     setDraftEntry: (entry: Partial<LexiconEntry> | null) => void;
     scriptConfig?: ScriptConfig;
     isScriptMode?: boolean;
+    author?: string;
 }
+
+const TERMINAL_HEADER = `
+██╗  ██╗ ██████╗ ██████╗ ███████╗██╗      █████╗ ███╗   ██╗ ██████╗ 
+██║ ██╔╝██╔═══██╗██╔══██╗██╔════╝██║     ██╔══██╗████╗  ██║██╔════╝ 
+█████╔╝ ██║   ██║██████╔╝█████╗  ██║     ███████║██╔██╗ ██║██║  ███╗
+██╔═██╗ ██║   ██║██╔══██╗██╔══╝  ██║     ██╔══██║██║╚██╗██║██║   ██║
+██║  ██╗╚██████╔╝██║  ██║███████╗███████╗██║  ██║██║ ╚████║╚██████╔╝
+╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝ 
+`;
 
 const ConsoleConfig: React.FC<ConsoleConfigProps> = ({
     constraints, setConstraints, settings, setSettings, entries, setEntries, history, setHistory,
-    setProjectName, setProjectDescription, setProjectAuthor, setIsSidebarOpen, setView, setJumpToTerm, setDraftEntry, scriptConfig, isScriptMode = false
+    setProjectName, setProjectDescription, setProjectAuthor, setIsSidebarOpen, setView, setJumpToTerm, setDraftEntry, scriptConfig, isScriptMode = false, author = 'user'
 }) => {
     const { t } = useTranslation();
     const [input, setInput] = useState('');
@@ -183,6 +194,19 @@ const ConsoleConfig: React.FC<ConsoleConfigProps> = ({
         setHistory(prev => [...prev, { type, content, timestamp, component }]);
     };
 
+    const clearTerminal = () => {
+        setHistory([{
+            type: 'info', content: TERMINAL_HEADER,
+            timestamp: ''
+        }]);
+    };
+
+    useEffect(() => {
+        if (history.length === 0) {
+            clearTerminal();
+        }
+    }, []);
+
     const handleCommand = async (cmdStr: string) => {
         if (!cmdStr.trim()) return;
         addLog('command', cmdStr);
@@ -191,7 +215,7 @@ const ConsoleConfig: React.FC<ConsoleConfigProps> = ({
 
         try {
             switch (cmd) {
-                case 'CLEAR': case 'CLS': setHistory([]); break;
+                case 'CLEAR': case 'CLS': clearTerminal(); break;
                 case 'FIX-NON-CANON':
                     if (!settings.enableAI) throw new Error('Servicio de IA desactivado.');
                     const invalid = entries.filter(e => {
@@ -200,17 +224,17 @@ const ConsoleConfig: React.FC<ConsoleConfigProps> = ({
                         return constraints.bannedSequences.some(s => w.includes(s.toLowerCase()));
                     });
                     if (invalid.length === 0) {
-                        addLog('success', 'El léxico cumple con las reglas fonotácticas actuales.');
+                        addLog('success', t('console.no_violations') || 'The lexicon complies with the current phonotactic rules.');
                         break;
                     }
-                    addLog('info', `Analizando ${invalid.length} violaciones de canon...`);
+                    addLog('info', `${t('console.analyzing') || 'Analyzing'} ${invalid.length} ${t('console.violations') || 'violations'}...`);
                     setLoadingAI(true);
                     const result = await repairLexicon(invalid, constraints);
                     // Falsa carga para feedback visual
                     setTimeout(() => setLoadingAI(false), 500);
                     if (result.success && result.repairs) {
                         addLog('info', 'Propuestas generadas. Revise la tabla de staging:', (
-                            <RepairReviewTable repairs={result.repairs} originalEntries={entries}
+                            <RepairReviewTable repairs={result.repairs} originalEntries={entries} t={t}
                                 onCommit={(repairedList) => {
                                     setEntries(prev => prev.map(entry => {
                                         const rep = repairedList.find(r => r.id === entry.id);
@@ -223,9 +247,12 @@ const ConsoleConfig: React.FC<ConsoleConfigProps> = ({
                     } else throw new Error(result.message || 'Fallo en la pipeline de IA.');
                     break;
                 case 'HELP':
-                    addLog('output', 'COMANDOS DISPONIBLES:');
-                    addLog('output', 'FIX-NON-CANON - Repara palabras que violan las reglas del proyecto.');
-                    addLog('output', 'CLEAR - Limpia el historial de la terminal.');
+                    addLog('output', t('console.available_commands') || 'AVAILABLE COMMANDS:');
+                    addLog('output', 'FIX-NON-CANON - ' + (t('console.help_fix') || 'Repairs words that violate the project rules.'));
+                    addLog('output', 'CLEAR - ' + (t('console.help_clear') || 'Clears the terminal history.'));
+                    break;
+                case 'ABOUT':
+                    addLog('output', t('msg.about_desc'));
                     break;
                 default:
                     // Support for free-form instructions via /ai
@@ -235,11 +262,11 @@ const ConsoleConfig: React.FC<ConsoleConfigProps> = ({
 
                         if (!isApiKeySet()) {
                             addLog('error', 'AI Command Failed: No API Key configured.');
-                            addLog('info', 'Configure GEMINI_API_KEY in your environment or follow the Documentation instructions.', (
+                            addLog('info', 'Configure your API Key in the Preferences menu (Settings icon) to enable AI features.', (
                                 <div className="mt-2 p-3 bg-amber-950/20 border border-amber-900/50 rounded-lg text-xs text-amber-200 flex items-start gap-3">
                                     <ShieldAlert size={16} className="shrink-0 text-amber-500" />
                                     <div>
-                                        Refer to the Documentation (File {' > '} Documentation) for setup steps.
+                                        Go to <b>Preferences (Settings) {' > '} General</b> and enter your Gemini API Key.
                                     </div>
                                 </div>
                             ));
@@ -257,7 +284,7 @@ const ConsoleConfig: React.FC<ConsoleConfigProps> = ({
                         }
                         return;
                     }
-                    addLog('error', `Instrucción "${cmd}" no reconocida.`);
+                    addLog('error', `Command not recognized by KoreLang Core.`);
             }
         } catch (e: any) { addLog('error', e.message); }
     };
@@ -265,7 +292,7 @@ const ConsoleConfig: React.FC<ConsoleConfigProps> = ({
     return (
         <div className="h-full flex flex-col bg-[var(--bg-main)] font-mono text-sm relative">
             <div className="p-2 bg-[var(--bg-panel)] border-b border-white/5 flex justify-between items-center text-xs text-[var(--text-2)]">
-                <span className="flex items-center gap-2"><Terminal size={14} /> kernel_v1.0.0_stable</span>
+                <span className="flex items-center gap-2"><Terminal size={14} /> KoreLang kernel_v1.1.0_stable</span>
                 <span className="flex items-center gap-2">
                     {loadingAI && <Zap size={12} className="animate-pulse text-purple-500" />}
                     SYSTEM_READY
@@ -278,8 +305,8 @@ const ConsoleConfig: React.FC<ConsoleConfigProps> = ({
                 {history.map((log, i) => (
                     <div key={i} className={`flex flex - col ${log.type === 'error' ? 'text-red-500' : log.type === 'success' ? 'text-emerald-400' : log.type === 'command' ? 'text-[var(--text-1)] font-bold' : 'text-[var(--text-2)]'} `}>
                         <div className="flex gap-3 leading-relaxed">
-                            {log.type === 'command' && <span className="text-emerald-500">➜</span>}
-                            <span>{log.content}</span>
+                            {log.type === 'command' && <span className="text-emerald-500">KoreLang-@{author}:~$</span>}
+                            <span className={log.content === TERMINAL_HEADER ? "whitespace-pre text-blue-400 font-bold leading-none" : ""}>{log.content}</span>
                         </div>
                         {log.component && <div className="mt-2 mb-4">{log.component}</div>}
                     </div>
@@ -287,7 +314,7 @@ const ConsoleConfig: React.FC<ConsoleConfigProps> = ({
                 <div ref={bottomRef} />
             </div>
             <div className="p-4 bg-[var(--bg-main)] border-t border-white/5 flex items-center gap-3">
-                <span className="text-emerald-500 font-bold">➜</span>
+                <span className="text-emerald-500 font-bold">KoreLang-@{author}:~$</span>
                 <input
                     ref={inputRef}
                     value={input}
@@ -296,7 +323,7 @@ const ConsoleConfig: React.FC<ConsoleConfigProps> = ({
                         if (e.key === 'Enter') { handleCommand(input); setInput(''); }
                     }}
                     className="bg-transparent border-none outline-none text-[var(--text-1)] w-full"
-                    placeholder="Esperando instrucción..."
+                    placeholder={t('console.placeholder')}
                     autoComplete="off"
                 />
             </div>

@@ -1,4 +1,4 @@
-# Conlang Studio
+# KoreLang
 
 A professional Integrated Development Environment (IDE) for constructed languages.
 

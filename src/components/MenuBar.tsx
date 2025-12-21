@@ -18,6 +18,7 @@ interface MenuBarProps {
   settings: AppSettings;
   isScriptMode?: boolean; // NEW PROP
   onToggleScriptMode?: () => void; // NEW PROP
+  onOpenAbout?: () => void;
 }
 
 const MenuBar: React.FC<MenuBarProps> = ({
@@ -31,7 +32,8 @@ const MenuBar: React.FC<MenuBarProps> = ({
   onToggleSidebar,
   settings,
   isScriptMode,
-  onToggleScriptMode
+  onToggleScriptMode,
+  onOpenAbout
 }) => {
   const { t } = useTranslation();
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
@@ -85,7 +87,7 @@ const MenuBar: React.FC<MenuBarProps> = ({
       label: t('menu.help'),
       items: [
         { label: t('menu.docs'), icon: HelpCircle, action: () => window.open('https://github.com/rzRudy/Conlang-Studio', '_blank') },
-        { label: t('menu.about'), action: () => alert(`${t('msg.about_title')}\n${t('msg.about_desc')}`) },
+        { label: t('menu.about'), action: () => onOpenAbout?.() },
       ]
     }
   ];
@@ -112,7 +114,7 @@ const MenuBar: React.FC<MenuBarProps> = ({
 
       {/* Logo Area - me-4 (margin-end) flips margin for RTL */}
       <div className="me-4 flex items-center gap-2 text-blue-500 font-bold px-2">
-        <span>⚡ CS</span>
+        <span>⚡ KL</span>
       </div>
 
       {/* Menu Items */}
